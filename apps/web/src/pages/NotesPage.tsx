@@ -24,8 +24,8 @@ export default function NotesPage() {
   const [debounced, setDebounced] = useState("");
   const [projectsOpen, setProjectsOpen] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => setDebounced(q.trim()), 200);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setDebounced(q.trim()), 200);
+    return () => clearTimeout(timer);
   }, [q]);
   const { data: notes, isLoading, error, refetch } = useNotes(debounced || undefined);
 
@@ -188,8 +188,8 @@ function NoteEditor({ id, onBack }: { id: string; onBack: () => void }) {
   saveRef.current = save;
   useEffect(() => {
     if (!dirty || save.isPending) return;
-    const t = setTimeout(() => saveRef.current.mutate(undefined), 1000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => saveRef.current.mutate(undefined), 1000);
+    return () => clearTimeout(timer);
   }, [dirty, title, content, projectId, save.isPending]);
 
   const toggleTask = useCallback((line: number) => setContent((c) => toggleTaskLine(c, line)), []);
