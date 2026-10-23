@@ -11,6 +11,10 @@ import { api } from "../lib/api";
 import { cn, relativeTime } from "../lib/utils";
 import { useI18n } from "../lib/i18n";
 
+// Stored as-is regardless of the UI language, so the title doesn't depend on who saved it last and
+// agent tools, search and server notifications see one stable value. Localized only when displayed.
+const UNTITLED = "Untitled";
+
 export default function NotesPage() {
   const i18n = useI18n();
   const { t } = i18n;
@@ -25,7 +29,7 @@ export default function NotesPage() {
   }, [q]);
   const { data: notes, isLoading, error, refetch } = useNotes(debounced || undefined);
 
-  const create = useApiMutation(() => api<{ note: Note }>("/notes", { method: "POST", body: { title: t("notes.untitled"), content: "" } }), {
+  const create = useApiMutation(() => api<{ note: Note }>("/notes", { method: "POST", body: { title: UNTITLED, content: "" } }), {
     invalidate: [["notes"]],
     onSuccess: (r) => navigate(`/notes/${r.note.id}?edit=1`),
   });
@@ -77,7 +81,7 @@ export default function NotesPage() {
                     )}
                   >
                     <div className="flex items-center gap-2">
-                      <p className="min-w-0 flex-1 truncate text-sm font-medium">{n.title}</p>
+                      <p className="min-w-0 flex-1 truncate text-sm font-medium">{n.title === UNTITLED ? t("notes.untitled") : n.title}</p>
                       {tasks.total > 0 && (
                         <span className={cn("flex shrink-0 items-center gap-1 text-[11px] tabular-nums", tasks.done === tasks.total ? "text-success" : "text-fg-subtle")}>
                           <CircleCheck className="h-3 w-3" />
@@ -139,7 +143,8 @@ function NoteEditor({ id, onBack }: { id: string; onBack: () => void }) {
       .then((r) => {
         if (stale) return;
         setNote(r.note);
-        setTitle(r.note.title);
+        // Leave the input empty for an untitled note so its placeholder shows instead of the sentinel.
+        setTitle(r.note.title === UNTITLED ? "" : r.note.title);
         setContent(r.note.content);
         setProjectId(r.note.project_id ?? "");
         if (!r.note.content) setMode("edit");
@@ -152,9 +157,9 @@ function NoteEditor({ id, onBack }: { id: string; onBack: () => void }) {
     };
   }, [id]);
 
-  // Compare the title as it will be stored (trimmed, "Untitled" in the UI language when empty); comparing the raw
+  // Compare the title as it will be stored (trimmed, UNTITLED when empty); comparing the raw
   // input would keep the note dirty forever and autosave in a loop.
-  const savedTitle = title.trim() || t("notes.untitled");
+  const savedTitle = title.trim() || UNTITLED;
   const dirty = !!note && (savedTitle !== note.title || content !== note.content || projectId !== (note.project_id ?? ""));
   const body = { title: savedTitle, content, project_id: projectId || null };
 
@@ -301,7 +306,7 @@ function NoteEditor({ id, onBack }: { id: string; onBack: () => void }) {
       <ConfirmDialog
         open={confirmDelete}
         title={t("notes.deleteTitle")}
-        message={t("notes.deleteMessage", { title: note.title })}
+        message={t("notes.deleteMessage", { title: note.title === UNTITLED ? t("notes.untitled") : note.title })}
         onCancel={() => setConfirmDelete(false)}
         onConfirm={() => remove.mutate(undefined)}
         loading={remove.isPending}
