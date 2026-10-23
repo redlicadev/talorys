@@ -85,7 +85,7 @@ export default function NotesPage() {
                       {tasks.total > 0 && (
                         <span className={cn("flex shrink-0 items-center gap-1 text-[11px] tabular-nums", tasks.done === tasks.total ? "text-success" : "text-fg-subtle")}>
                           <CircleCheck className="h-3 w-3" />
-                          {tasks.done}/{tasks.total}
+                          {t("notes.todosCount", { done: tasks.done, total: tasks.total })}
                         </span>
                       )}
                     </div>

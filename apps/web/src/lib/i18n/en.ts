@@ -202,6 +202,7 @@ export const en = {
   "notes.words": { one: "{count} word", other: "{count} words" },
   "notes.readingTime": "{minutes} min read",
   "notes.todosDone": "{done}/{total} done",
+  "notes.todosCount": "{done}/{total}",
 
   "projects.title": "Projects",
   "projects.description": "Lightweight projects group tasks and notes and give Talorys context.",
